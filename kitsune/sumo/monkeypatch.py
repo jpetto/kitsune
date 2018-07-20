@@ -4,8 +4,8 @@ from functools import wraps
 from django.forms import fields
 from django.forms import widgets
 
-from elasticutils import get_es as base_get_es
-from elasticutils.contrib import django as elasticutils_django
+# from elasticutils import get_es as base_get_es
+# from elasticutils.contrib import django as elasticutils_django
 
 
 _has_been_patched = False
@@ -70,8 +70,8 @@ def patch():
     fields.EmailField.widget = EmailWidget
 
     # Workaround until https://code.djangoproject.com/ticket/16920 gets fixed.
-    from django.contrib.admin import util
-    from django.contrib.admin.util import NestedObjects
+    from django.contrib.admin import utils
+    from django.contrib.admin.utils import NestedObjects
     from django.db import models
 
     def _collect(self, objs, source_attr=None, **kwargs):
@@ -88,7 +88,7 @@ def patch():
         except models.ProtectedError as e:
             self.protected.update(e.protected_objects)
 
-    util.NestedObjects.collect = _collect
+    utils.NestedObjects.collect = _collect
 
     # Monkey-patch admin site.
     from django.contrib import admin
@@ -96,6 +96,7 @@ def patch():
 
     # Patch the admin
     admin.site = AdminSitePlus()
+    admin.sites.site = admin.site
     admin.site.site_header = 'Kitsune Administration'
     admin.site.site_title = 'Mozilla Support'
 
@@ -121,8 +122,9 @@ def patch():
         }
 
         defaults.update(overrides)
-        return base_get_es(**defaults)
-    elasticutils_django.get_es = get_es
+        return None
+        # return base_get_es(**defaults)
+    # elasticutils_django.get_es = get_es
 
     def S_get_es(self, default_builder=get_es):
         """Returns the elasticsearch Elasticsearch object to use.
@@ -131,8 +133,9 @@ def patch():
         into account settings in ``settings.py``.
 
         """
-        return super(elasticutils_django.S, self).get_es(default_builder=default_builder)
-    elasticutils_django.S.get_es = S_get_es
+        # return super(elasticutils_django.S, self).get_es(default_builder=default_builder)
+        return None
+    # elasticutils_django.S.get_es = S_get_es
 
     _has_been_patched = True
 
